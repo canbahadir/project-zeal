@@ -2,6 +2,9 @@
 
 GCP example project using GKE + Docker + GCR + Helm + Prometheus/Grafana + Sonarqube + Gremlin.
 
+## Overall architecture
+
+![Zeal GKE Architecture](https://github.com/canbahadir/project-zeal/blob/development/zeal-gke-arch.png?raw=true)
 
 ## Set up environment
 
