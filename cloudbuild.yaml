@@ -2,7 +2,7 @@ steps:
   - name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
     args:
     - '-Dsonar.host.url=https://sonarcloud.io'
-    - '-Dsonar.login=960eb824c3c39045e47da57825878342775a5af5'
+    - '-Dsonar.login=${_SONARQUBE_KEY}'
     - '-Dsonar.projectKey=canbahadir_project-zeal'
     - '-Dsonar.organization=canbahadir'
     - '-Dsonar.sources=.'

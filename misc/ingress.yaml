@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-resource
@@ -7,9 +7,13 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
-  - http:
+  - host: "kube.bcan.me"
+    http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: nodeapp-helm-chart
-          servicePort: 80
+          service:
+            name: node-app-blue-helm-chart
+            port:
+              number: 80
