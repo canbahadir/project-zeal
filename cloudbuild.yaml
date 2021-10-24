@@ -1,5 +1,5 @@
 steps:
-  - name: node:6.13.6
+  - name: node:6
     entrypoint: npm
     args: ['install']
   - name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
