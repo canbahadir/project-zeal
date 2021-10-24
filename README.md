@@ -1,9 +1,9 @@
 # project-zeal
 
-GCP example project using GKE + Docker + GCR + Helm + Sonarqube + Gremlin.
+GCP example project using GKE + Docker + GCR + Helm + Prometheus/Grafana + Sonarqube + Gremlin.
 
 
-## Setting up
+## Set up environment
 
 Setup a vagrant environment to work with. Then use it with VS Code.
 
@@ -137,9 +137,18 @@ By default cloud build does not include sonar scanner and helm images so cant us
 
 To enable them we should push images to our project. There is a cloud-builders-community github repository for managing those images easily. To do this run following commands.
 
+    #helm
     git clone https://github.com/GoogleCloudPlatform/cloud-builders-community.git
     cd cloud-builders-community/helm
     gcloud builds submit . --config=cloudbuild.yaml
+
+    #Sonarqube
+    #Open Dockerfile /cloud-builders-community/sonarqube/Dockerfile
+    #Add following lines before run section
+    #   ENV TZ=Europe/Istanbul
+    #   RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+    #Update apt-get line like this:
+    #   && apt-get install -y openjdk-11-jdk-headless tzdata curl unzip bash nodejs npm \
     cd ../sonarqube/
     gcloud builds submit . --config=cloudbuild.yaml
 
@@ -153,4 +162,75 @@ Also to use sonarscanner we need to create a sonarqube account, connect our repo
 
 Now everything is ready to work within cloud build.
 Go to cloud build page, navigate to triggers section, click to create trigger. Connect github account/repository select main branch and select trigger on commit. It will work on commit and results also will be seen on github commits.
+
+Now my app is reachable at:
+
+[kube.bcan.me](kube.bcan.me)
+
+
+## Set up Prometheus/Grafana
+
+Add prometheus-community helm repo
+
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+
+Apply a kube-prometheus-stack deployment using helm on a different namespace
+
+    helm install promstack prometheus-community/kube-prometheus-stack --create-namespace --namespace=monitoring
+
+
+Check if pods and services are ok
+
+    kubectl get pods --all-namespaces
+    kubectl get svc --all-namespaces
+
+Get a second static ip to forward
+
+    gcloud compute addresses create grafana-ip --region us-central1
+    gcloud compute addresses list
+
+Set second ingress controller with different class and with newly created static ip
+
+    helm install monitoring-ingress nginx-stable/nginx-ingress --set rbac.create=true --set controller.service.loadBalancerIP=<grafana-ip> --set controller.ingressClass=nginx-monitoring  --namespace=monitoring 
+
+Apply ingress-resource for monitoring stack.
+
+    kubectl apply -f misc/ingress-monitoring.yaml
+
+Now my app is reachable at:
+
+[grafana.bcan.me](grafana.bcan.me)
+
+
+## Chaos Engineering with Gremlin
+
+We can apply various system resource test with gremlin free tier and test our systems reliability.
+
+https://www.gremlin.com/blog/introducing-gremlin-free/
+
+
+Signup/login from here: https://app.gremlin.com/signup
+
+Add Gremlin helm repo
+
+    helm repo add gremlin https://helm.gremlin.com
+
+Create Gremlin namespace
+
+    kubectl create namespace gremlin
+
+Go to Team Settings > Configuration Page from Gremlin website.  Get TEAM_ID and create TEAM_SECRET from this page. Give anything to clusterID as you wish.
+
+Deploy Gremlin
+
+    helm install gremlin gremlin/gremlin \
+        --namespace gremlin \
+        --set gremlin.secret.managed=true \
+        --set gremlin.secret.type=secret \
+        --set gremlin.secret.teamID=$GREMLIN_TEAM_ID \
+        --set gremlin.secret.clusterID=$GREMLIN_CLUSTER_ID \
+        --set gremlin.secret.teamSecret=$GREMLIN_TEAM_SECRET
+
+Now we should be able to see our cluster on Gremlin GUI. From there either click attack or click scenario to design and start a chaos engineering test.
 
