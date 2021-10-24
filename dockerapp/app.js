@@ -7,7 +7,7 @@ const server = http.createServer((req, res) => {
     if (req.url == '/secret-page'){
         res.statusCode = 200;
             res.setHeader('Content-Type', 'text/html');
-                res.end('<h1>Bahadir Can</h1>');
+                res.end('<h1>You found this page???</h1>');
 
     } else {
         res.statusCode = 200;
