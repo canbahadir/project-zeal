@@ -3,6 +3,11 @@
 GCP example project using GKE + Docker + GCR + Helm + Prometheus/Grafana + Sonarqube + Gremlin.
 
 
+## Overall architecture
+
+![Zeal GKE Architecture](https://github.com/canbahadir/project-zeal/blob/development/zeal_gke_arch.png?raw=true)
+
+
 ## Set up environment
 
 Setup a vagrant environment to work with. Then use it with VS Code.
